@@ -20,7 +20,7 @@ const saleOrderSchema = new mongoose.Schema({
   },
   userStatus: {
     type: String,
-    enum: ['PENDING', 'CONFIRMED', 'SHIPPING', 'COMPLETED', 'RETURNED'],
+    enum: ['PENDING', 'CONFIRMED', 'SHIPPING', 'COMPLETED', 'RETURNED', 'CANCELLED'],
     default: 'PENDING'
   },
   cancelReason: {
