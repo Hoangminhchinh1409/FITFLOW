@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const CHECKOUT_PAYMENT_METHODS = ["COD", "PayOS", "PayPal"];
 
@@ -50,10 +50,6 @@ export const createCheckoutSchema = (options = {}) =>
       province: z.preprocess(
         (value) => normalizeNfc(value),
         z.string().min(1, "Chọn tỉnh/thành phố.")
-      ),
-      district: z.preprocess(
-        (value) => normalizeNfc(value),
-        z.string().min(1, "Chọn quận/huyện.")
       ),
       ward: z.preprocess(
         (value) => normalizeNfc(value),

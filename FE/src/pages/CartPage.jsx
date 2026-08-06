@@ -42,7 +42,7 @@ const sanitizeCheckoutForm = (nextForm = {}) => ({
   phone: normalizePhoneInput(nextForm.phone),
   email: normalizeEmail(nextForm.email),
   province: normalizeText(nextForm.province),
-  district: normalizeText(nextForm.district),
+  
   ward: normalizeText(nextForm.ward),
   detailedAddress: normalizeText(nextForm.detailedAddress),
   note: normalizeText(nextForm.note),
@@ -70,7 +70,7 @@ const calculateDays = (startDate, endDate) => {
 }
 
 const buildShippingAddress = (form) =>
-  [form.detailedAddress?.trim(), form.ward?.trim(), form.district?.trim(), form.province?.trim()]
+  [form.detailedAddress?.trim(), form.ward?.trim(),  form.province?.trim()]
     .filter(Boolean)
     .join(', ')
 
@@ -84,7 +84,7 @@ const getStoredAddressHistory = () => {
 }
 
 const saveAddressHistory = (entry) => {
-  if (!entry?.province || !entry?.district || !entry?.ward || !entry?.detailedAddress) return
+  if (!entry?.province || !entry?.ward || !entry?.detailedAddress) return
   const existing = getStoredAddressHistory()
   const next = [
     entry,
@@ -92,7 +92,7 @@ const saveAddressHistory = (entry) => {
       (item) =>
         !(
           item.province === entry.province &&
-          item.district === entry.district &&
+          
           item.ward === entry.ward &&
           item.detailedAddress === entry.detailedAddress &&
           item.hotel === entry.hotel
@@ -272,7 +272,7 @@ export default function CartPage() {
     phone: '',
     email: '',
     province: 'Tỉnh/Thành phố',
-    district: 'Huyện/Quận',
+    
     ward: ' Phường/Xã',
     detailedAddress: '',
     paymentMethod: 'COD',
@@ -358,12 +358,10 @@ export default function CartPage() {
     () => ADDRESS_DATA.find((item) => item.province === buyForm.province) || ADDRESS_DATA[0],
     [buyForm.province]
   )
-  const districtOptions = useMemo(() => selectedProvince?.districts || [], [selectedProvince])
-  const selectedDistrict = useMemo(
-    () => districtOptions.find((item) => item.district === buyForm.district) || districtOptions[0],
-    [buyForm.district, districtOptions]
-  )
-  const wardOptions = useMemo(() => selectedDistrict?.wards || [], [selectedDistrict])
+  
+  
+  
+  const wardOptions = useMemo(() => selectedProvince?.wards || [], [selectedProvince])
 
   const rentalDiscountAmount = Number(rentalVoucherResult?.discountAmount || 0)
   const rentalSubtotalAfterVoucher = Math.max(Number(rentalVoucherResult?.finalTotal ?? rentalTotalAmount), 0)
@@ -381,9 +379,9 @@ export default function CartPage() {
   const addressSuggestions = useMemo(
     () =>
       addressHistory
-        .filter((entry) => (!buyForm.province || entry.province === buyForm.province) && (!buyForm.district || entry.district === buyForm.district))
+        .filter((entry) => (!buyForm.province || entry.province === buyForm.province))
         .slice(0, 3),
-    [addressHistory, buyForm.district, buyForm.province]
+    [addressHistory, buyForm.province]
   )
   const checkoutSchemaOptions = useMemo(
     () => ({
@@ -412,12 +410,9 @@ export default function CartPage() {
         fieldErrors.province = fieldErrors.province || 'Tỉnh/thành phố không hợp lệ.'
       }
 
-      const districtEntry = selectedProvinceEntry?.districts?.find((item) => item.district === sanitized.district)
-      if (!districtEntry) {
-        fieldErrors.district = fieldErrors.district || 'Quận/huyện không hợp lệ.'
-      }
+      
 
-      const validWard = Array.isArray(districtEntry?.wards) && districtEntry.wards.includes(sanitized.ward)
+      const validWard = Array.isArray(selectedProvinceEntry?.wards) && selectedProvinceEntry.wards.includes(sanitized.ward)
       if (!validWard) {
         fieldErrors.ward = fieldErrors.ward || 'Phường/xã không hợp lệ.'
       }
@@ -478,17 +473,12 @@ export default function CartPage() {
 
     if (field === 'province') {
       const selectedProvinceEntry = ADDRESS_DATA.find((item) => item.province === rawValue)
-      const nextDistrict = selectedProvinceEntry?.districts?.[0]?.district || ''
-      const nextWard = selectedProvinceEntry?.districts?.[0]?.wards?.[0] || ''
-      nextForm.district = nextDistrict
+      const nextWard = selectedProvinceEntry?.wards?.[0] || ''
+      
       nextForm.ward = nextWard
     }
 
-    if (field === 'district') {
-      const selectedProvinceEntry = ADDRESS_DATA.find((item) => item.province === nextForm.province)
-      const selectedDistrictEntry = selectedProvinceEntry?.districts?.find((item) => item.district === rawValue)
-      nextForm.ward = selectedDistrictEntry?.wards?.[0] || ''
-    }
+    
 
     setBuyForm(nextForm)
 
@@ -506,15 +496,12 @@ export default function CartPage() {
         if (nextErrors[field]) next[field] = nextErrors[field]
         else delete next[field]
         if (field === 'province') {
-          if (nextErrors.district) next.district = nextErrors.district
-          else delete next.district
+          
+          
           if (nextErrors.ward) next.ward = nextErrors.ward
           else delete next.ward
         }
-        if (field === 'district') {
-          if (nextErrors.ward) next.ward = nextErrors.ward
-          else delete next.ward
-        }
+        
         return next
       })
     }
@@ -531,15 +518,12 @@ export default function CartPage() {
       if (nextErrors[field]) next[field] = nextErrors[field]
       else delete next[field]
       if (field === 'province') {
-        if (nextErrors.district) next.district = nextErrors.district
-        else delete next.district
+        
+        
         if (nextErrors.ward) next.ward = nextErrors.ward
         else delete next.ward
       }
-      if (field === 'district') {
-        if (nextErrors.ward) next.ward = nextErrors.ward
-        else delete next.ward
-      }
+      
       return next
     })
   }
@@ -770,7 +754,7 @@ export default function CartPage() {
         phone: true,
         email: true,
         province: true,
-        district: true,
+        
         ward: true,
         detailedAddress: true,
       })
@@ -868,7 +852,7 @@ export default function CartPage() {
         if (!isAuthenticated) setGuestVerificationSession(null)
         saveAddressHistory({
           province: sanitizedBuyForm.province,
-          district: sanitizedBuyForm.district,
+          
           ward: sanitizedBuyForm.ward,
           detailedAddress: sanitizedBuyForm.detailedAddress,
           hotel: ''
@@ -1265,22 +1249,8 @@ export default function CartPage() {
                             </select>
                             {buyTouched.province && buyFieldErrors.province ? <FieldError message={buyFieldErrors.province} id="checkout-province-error" /> : null}
                           </div>
+
                           <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">Quận / Huyện</label>
-                            <select
-                              id="checkout-district"
-                              value={buyForm.district}
-                              onChange={(event) => handleBuyFieldChange('district', event.target.value)}
-                              onBlur={() => handleBuyFieldBlur('district')}
-                              className={getBuyFieldClassName('district')}
-                              aria-invalid={Boolean(buyTouched.district && buyFieldErrors.district)}
-                              aria-describedby={buyTouched.district && buyFieldErrors.district ? 'checkout-district-error' : undefined}
-                            >
-                              {districtOptions.map((item) => <option key={item.district} value={item.district}>{item.district}</option>)}
-                            </select>
-                            {buyTouched.district && buyFieldErrors.district ? <FieldError message={buyFieldErrors.district} id="checkout-district-error" /> : null}
-                          </div>
-                          <div className="sm:col-span-2">
                             <label className="mb-2 block text-sm font-medium text-slate-700">Phường / Xã</label>
                             <select
                               id="checkout-ward"
