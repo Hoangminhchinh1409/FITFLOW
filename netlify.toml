@@ -1,0 +1,24 @@
+# FITFLOW is a monorepo: the Vite/React frontend lives in FE/, the Express API in BE/.
+# Netlify only builds the frontend, so the build is scoped to the FE/ directory.
+[build]
+  base = "FE"
+  # Install from package-lock.json before building: vite lives in devDependencies, so
+  # the build fails with "vite: not found" whenever node_modules is not already present.
+  command = "npm ci --include=dev --no-audit --no-fund && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# React Router uses BrowserRouter, so every unmatched path must fall back to
+# index.html and let the client-side router resolve it.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Vite fingerprints everything in dist/assets, so it is safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
